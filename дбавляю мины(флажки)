@@ -1,0 +1,99 @@
+package com.javarush.games.minesweeper;
+
+import com.javarush.engine.cell.Color;
+import com.javarush.engine.cell.Game;
+
+import java.util.ArrayList;
+import java.util.List;
+/*
+Требования:
+•	В классе MinesweeperGame должно существовать приватное статическое final поле String MINE, инициализированное при объявлении. Например, использовать можно UTF-16 символ мины "\uD83D\uDCA3".
+•	В классе MinesweeperGame должен существовать приватный метод void openTile(int x, int y).
+•	Метод openTile(int, int) должен отрисовывать MINE, если gameObject по текущим координатам является миной. Используй метод setCellValue(int, int, String).
+•	Метод openTile(int, int) должен отрисовывать количество соседей-мин, если gameObject по текущим координатам не является миной. Используй метод setCellNumber(int, int, int).
+•	В классе GameObject должно существовать публичное поле isOpen типа boolean.
+•	В методе openTile(int, int) элементу матрицы gameField должно устанавливаться значение поля isOpen, равное true, и отрисовываться фон ячейки с помощью метода setCellColor(int, int, Color). Например, в Color.GREEN.
+•	В классе MinesweeperGame должен быть переопределен метод onMouseLeftClick(int, int) родительского класса Game.
+•	В методе onMouseLeftClick(int, int) должен быть вызван метод openTile(int, int).
+*/
+public class MinesweeperGame extends Game {
+    private static final int SIDE = 9;
+    private GameObject[][] gameField = new GameObject[SIDE][SIDE];
+    private int countMinesOnField;
+    private static final String MINE = "UTF - 25"; 
+      
+     private void openTile(int x, int y){
+       // for(int b = 0; b < gameField.length; b++){
+        // for(int a = 0; a < gameField[b].length; a++){
+            if(gameField[y][x].isMine){
+              setCellValue(x, y, MINE);
+       } else setCellNumber(x, y, gameField[y][x].countMineNeighbors);
+         
+        
+    gameField[y][x].isOpen = true;
+    setCellColor(x, y, Color.GRAY);
+     
+    
+}
+
+public void onMouseLeftClick(int x, int y){
+      openTile(x, y);
+}
+
+      @Override
+    public void initialize() {
+        setScreenSize(SIDE, SIDE);
+        createGame();
+    }
+
+    private void createGame() {
+        for (int y = 0; y < SIDE; y++) {
+            for (int x = 0; x < SIDE; x++) {
+                boolean isMine = getRandomNumber(10) < 1;
+                if (isMine) {
+                    countMinesOnField++;
+                }
+                gameField[y][x] = new GameObject(x, y, isMine);
+                setCellColor(x, y, Color.ORANGE);
+            }
+        }
+       countMineNeighbors();
+    }
+
+    private List<GameObject> getNeighbors(GameObject gameObject) {
+        List<GameObject> result = new ArrayList<>();
+        for (int y = gameObject.y - 1; y <= gameObject.y + 1; y++) {
+            for (int x = gameObject.x - 1; x <= gameObject.x + 1; x++) {
+                if (y < 0 || y >= SIDE) {
+                    continue;
+                }
+                if (x < 0 || x >= SIDE) {
+                    continue;
+                }
+                if (gameField[y][x] == gameObject) {
+                    continue;
+                }
+                result.add(gameField[y][x]);
+            }
+        }
+        return result;
+    }
+    
+    private void countMineNeighbors() {
+        List<GameObject> list = new ArrayList<>();
+        for(int y = 0; y < SIDE; y ++){
+         for(int x = 0; x < SIDE; x ++){
+          if(!gameField[y][x].isMine){
+              list = getNeighbors(gameField[y][x]);
+              for(int i = 0; i < list.size(); i++){
+                if(list.get(i).isMine) 
+                gameField[y][x].countMineNeighbors++;
+              }
+            }  
+          }
+        
+        }    
+    }
+    
+    
+}
